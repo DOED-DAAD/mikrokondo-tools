@@ -10,11 +10,10 @@ on:
 
 
 jobs:
-  deploy:
+  test:
 
     runs-on: ubuntu-latest
-
-    environment: release
+    environment: latest
 
     steps:
     - uses: actions/checkout@v3
