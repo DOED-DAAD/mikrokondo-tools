@@ -64,7 +64,7 @@ def denested_information(keys: list[str], last_value: dict) -> dict:
 
     temp[Constants.type_field] = Constants.properties_type
     temp[Constants.extraction_field] = {keys[-1]: last_value}
-    
+
     return new_chain
 
 
@@ -93,25 +93,25 @@ def nest_schema(properties: dict) -> dict:
         if Constants.delimiter not in key:
             continue
         split_key = key.split(Constants.delimiter)
-        
+
         if new_dict.get(split_key[0]) is None:
             new_dict[split_key[0]] = {}
             new_dict[split_key[0]][Constants.type_field] = Constants.properties_type
             new_dict[split_key[0]][Constants.extraction_field] = {}
-    
+
         denested_data = denested_information(split_key[1:], values)
         if denested_data != values:
             # multiple fields to be set, update the properties instead of overwriting it
-            
+
             temp = denested_data
-            
+
             nd_temp = new_dict[split_key[0]][Constants.extraction_field]
             for i in split_key[1:-1]:
                 if nd_temp.get(i) is None:
                     nd_temp[i] = {}
                     nd_temp[i][Constants.type_field] = temp[i][Constants.type_field]
                     nd_temp[i][Constants.extraction_field] = {}
-                
+
                 nd_temp = nd_temp[i][Constants.extraction_field]
                 temp = temp[i][Constants.extraction_field]
 
@@ -160,7 +160,7 @@ def nest_properties(schema: dict) -> dict:
         new_properties = nest_schema(properties=props[Constants.extraction_field])
         del schema[Constants.nesting_field][k][Constants.extraction_field]
         schema[Constants.nesting_field][k][Constants.extraction_field] = new_properties
-        
+
 
     new_properties = nest_schema(properties=properties)
     del schema[Constants.extraction_field]
@@ -187,7 +187,7 @@ def reorganize_schema(schema) -> set:
     definitions dict: Updated definitions field in a json schema
     return drop_keys set: Additional fields to delete from the schema after processing
     """
-    
+
 
     definitions = schema[Constants.nesting_field]
     top_lvl_keys = frozenset(definitions.keys())

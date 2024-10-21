@@ -62,19 +62,19 @@ from tests import conftest
                 "seqkit.args.single_end": {"type": "string"},
             },
             {
-            "seqkit": 
+            "seqkit":
                 {
                 "type": "object",
-                "properties": 
+                "properties":
                     {
                     "singularity":
                         {"type": "string"},
                     "docker":
                         {"type": "string"},
-                    "args": 
+                    "args":
                         {
                             "type": "object",
-                            "properties": 
+                            "properties":
                             {
                                 "illumina": {"type": "string"},
                                 "single_end": {"type": "string"},
@@ -93,7 +93,7 @@ def test_nest_schema(test_val, output):
 def test_read_json(real_schema):
     assert real_schema == format.read_json(conftest.SCHEMA_PATH)
 
-@pytest.mark.parametrize("input_,output", 
+@pytest.mark.parametrize("input_,output",
                         [("singularity", "#/definitions/singularity")
                         ])
 def test_create_all_of_ref(input_, output):

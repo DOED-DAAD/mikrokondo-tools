@@ -4,11 +4,12 @@ tests for sketch downloading
 
 import pytest
 import requests
+
 from mikrokondo_tools.download import download
 
 
 @pytest.mark.parametrize("uri",
-                        [ 
+                        [
                         (download.Constants.sketch_url),
                         (download.Constants.dehost_idx),
                         (download.Constants.kraken2_std),
@@ -29,7 +30,7 @@ def test_constants_connection(uri):
                         "PhiPacHum_m2.idx"),
                         ("https://genome-idx.s3.amazonaws.com/kraken/k2_standard_20240112.tar.gz",
                         "k2_standard_20240112.tar.gz"),
-                        ("https://zenodo.org/records/10522951/files/db-light.tar.gz", 
+                        ("https://zenodo.org/records/10522951/files/db-light.tar.gz",
                         "db-light.tar.gz"),
                         ("https://zenodo.org/records/10522951/files/db.tar.gz", "db.tar.gz"),
                         ("db.tar.gz", "db.tar.gz")

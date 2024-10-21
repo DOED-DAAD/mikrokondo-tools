@@ -3,14 +3,13 @@ Download sketches from zenodo
 
 Matthew Wells: 2024-04-18
 """
-import requests
-
-import logging
 import itertools
-import sys
+import logging
 import os
+import sys
 from dataclasses import dataclass
 
+import requests
 
 logging.basicConfig(stream=sys.stderr, level=logging.INFO) # TODO this should probably go somewhere else
 logger = logging.getLogger(__name__)
@@ -34,7 +33,7 @@ def get_file_name(input_uri: str) -> str:
 
 def download_file(url: str, output_dir: str = None) -> str:
     """Download a file from zenodo and put it in the correct output director
-    
+
     output_dir str|os.Path: Output location different then local directory
     """
     output_file = get_file_name(url)

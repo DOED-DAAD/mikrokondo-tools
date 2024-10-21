@@ -4,8 +4,8 @@
 import click
 
 from mikrokondo_tools.__about__ import __version__
-from mikrokondo_tools.cli.format import fmt
 from mikrokondo_tools.cli.download import download
+from mikrokondo_tools.cli.format import fmt
 
 
 @click.group(context_settings={"help_option_names": ["-h", "--help"]}, invoke_without_command=True, no_args_is_help=True)
