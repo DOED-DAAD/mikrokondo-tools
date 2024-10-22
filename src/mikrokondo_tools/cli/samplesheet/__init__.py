@@ -6,7 +6,7 @@ import sys
 from mikrokondo_tools.samplesheet import samplesheet as ss
 import mikrokondo_tools.utils as u
 
-@click.command(short_help="Generate a sample sheet for mikrokondo.", no_args_is_help=True)
+@click.command(short_help="Generate a sample sheet for mikrokondo.", no_args_is_help=True, context_settings={'show_default': True})
 @click.option("-o", "--output-sheet", "output_sheet", required=True, type=click.Path(), help="The file to write your created output sheet to, this directory must already exist.")
 @click.option("-1", "--read-1-suffix", "read_1", type=click.STRING, help="A suffix to identify read 1", default="_R1_")
 @click.option("-2", "--read-2-suffix", "read_2", type=click.STRING, help="A suffix to identify read 2", default="_R2_")

@@ -26,6 +26,8 @@ def test_constants_connection(uri):
 @pytest.mark.parametrize( "input_url,value",
                         [("https://zenodo.org/records/8408361/files/GTDBSketch_20231003.msh",
                         "GTDBSketch_20231003.msh"),
+                        ("https://zenodo.org/records/13969103/files/EnteroRef_GTDBSketch_20231003_V2.msh",
+                        "EnteroRef_GTDBSketch_20231003_V2.msh"),
                         ("https://zenodo.org/records/8408557/files/PhiPacHum_m2.idx",
                         "PhiPacHum_m2.idx"),
                         ("https://genome-idx.s3.amazonaws.com/kraken/k2_standard_20240112.tar.gz",

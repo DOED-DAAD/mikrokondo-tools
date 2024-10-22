@@ -5,15 +5,16 @@ import click
 from mikrokondo_tools.download import download as dwnld
 
 options = {"gtdb-sketch": dwnld.Constants.sketch_url,
+        "gtdb-shigella": dwnld.Constants.shigella_sketch,
         "dehost": dwnld.Constants.dehost_idx,
         "kraken-std": dwnld.Constants.kraken2_std,
         "bakta-light": dwnld.Constants.bakta_light,
         "bakta-full": dwnld.Constants.bakta_full}
 
-@click.command(short_help="Download a database for mikrokondo", no_args_is_help=True)
+@click.command(short_help="Download a database for mikrokondo", no_args_is_help=True, context_settings={'show_default': True})
 @click.option("-f", "--file", "file", type=click.Choice(options.keys()), required = True,
             help="Pick an option from the list to download")
-@click.option("-o", "--output", "output", default=os.getcwd(), type=click.Path(), help="An existing directory to download files too.")
+@click.option("-o", "--output", "output", default=os.getcwd(), type=click.Path(), help="An existing directory to download files to.")
 def download(file, output):
     """Download a external file for use in mikrokondo. This script only downloads the file and will not untar or unzip them.
     """
