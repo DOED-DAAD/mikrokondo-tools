@@ -5,7 +5,6 @@ import click
 
 from mikrokondo_tools.__about__ import __version__
 from mikrokondo_tools.cli.download import download
-from mikrokondo_tools.cli.format import fmt
 from mikrokondo_tools.cli.samplesheet import samplesheet
 
 
@@ -14,7 +13,6 @@ from mikrokondo_tools.cli.samplesheet import samplesheet
 def mikrokondo_tools():
     pass
 
-mikrokondo_tools.add_command(fmt)
 mikrokondo_tools.add_command(download)
 mikrokondo_tools.add_command(samplesheet)
 
