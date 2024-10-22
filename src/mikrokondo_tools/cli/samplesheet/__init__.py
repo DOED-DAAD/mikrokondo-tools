@@ -13,7 +13,7 @@ import mikrokondo_tools.utils as u
 @click.option("-s", "--schema-input", "schema_input", type=click.Path(), default=None, help="An optional schema_input.json file pre-downloaded for mikrokondo.")
 @click.argument("input_directory", type=click.Path(exists=True))
 def samplesheet(output_sheet, read_1, read_2, input_directory, schema_input):
-    logger = u.get_logger()
+    logger = u.get_logger(__name__)
     if output_sheet.is_file():
         logger.error("Input sample sheet already exists, please re-name your new sheet or the existing one. %s", output_sheet)
         sys.exit(e.EEXIST)
