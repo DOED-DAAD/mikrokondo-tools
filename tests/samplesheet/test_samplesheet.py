@@ -59,8 +59,8 @@ def test_organize_data(ngs_data_pass):
     for k, v in outputs.items():
         sample_rows = ss_out[k]
         assert len(v) == len(sample_rows)
-        sample_rows.sort()
-        v.sort()
+        sample_rows.sort(key=lambda x: x.sample)
+        v.sort(key=lambda x: x.sample)
         for i, f in zip(sample_rows, v):
             sample_data = asdict(f)
             for field in sample_data:
