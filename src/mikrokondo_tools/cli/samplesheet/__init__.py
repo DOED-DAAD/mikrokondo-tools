@@ -13,11 +13,12 @@ import mikrokondo_tools.utils as u
 @click.option("-s", "--schema-input", "schema_input", type=click.Path(), default=None, help="An optional schema_input.json file pre-downloaded for mikrokondo.")
 @click.argument("input_directory", type=click.Path(exists=True))
 def samplesheet(output_sheet, read_1, read_2, input_directory, schema_input):
-    logger = u.get_logger()
+    logger = u.get_logger(__name__)
+    output_sheet = p.Path(output_sheet)
     if output_sheet.is_file():
         logger.error("Input sample sheet already exists, please re-name your new sheet or the existing one. %s", output_sheet)
         sys.exit(e.EEXIST)
 
     data = ss.get_samples(p.Path(input_directory))
-    ngs_data = ss.NGSData(data[0], data[1], read_1, read_2, p.Path(output_sheet), schema_input)
+    ngs_data = ss.NGSData(data[0], data[1], read_1, read_2, output_sheet, schema_input)
     return ngs_data.create_sample_sheet()
