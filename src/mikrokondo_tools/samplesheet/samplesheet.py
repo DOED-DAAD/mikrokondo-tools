@@ -62,9 +62,9 @@ class NGSData:
     Organization of ngs data for creation of a sample sheet
     """
 
-    def __init__(self, reads: list[p.Path], fastas: list[p.Path], extension_r1: str, extension_r2: str, output_file: p.Path, json_schema: t.Optional[p.Path] = None):
-        self.reads: list[str] = reads
-        self.fastas: list[str] = fastas
+    def __init__(self, reads: t.List[p.Path], fastas: t.List[p.Path], extension_r1: str, extension_r2: str, output_file: p.Path, json_schema: t.Optional[p.Path] = None):
+        self.reads: t.List[str] = reads
+        self.fastas: t.List[str] = fastas
         self.extension_r1: str = extension_r1
         self.extension_r2: str = extension_r2
         self.json_schema = self.get_json_schema(json_schema)
@@ -102,7 +102,7 @@ class NGSData:
                 pattern = rf"(?:{pattern}|^$)"
                 schema[items_key][properties_key][k][pattern_key] = pattern
 
-    def create_sample_sheet(self, sample_data: t.Optional[dict[str, list[SampleRow]]] = None, output_file: t.Optional[p.Path] = None):
+    def create_sample_sheet(self, sample_data: t.Optional[t.Dict[str, t.List[SampleRow]]] = None, output_file: t.Optional[p.Path] = None):
         """
         Main runner function to create a sample sheet
         """
@@ -129,7 +129,7 @@ class NGSData:
 
 
     
-    def validate_json(self, jsonified_data: list[dict]):
+    def validate_json(self, jsonified_data: t.List[dict]):
         """
         Validate the json data
         """
@@ -144,11 +144,11 @@ class NGSData:
         if error_p:
             raise js.ValidationError("Validation errors encountered check logs")
     
-    def jsonify_schema(self, sample_data: dict[str, list[SampleRow]]):
+    def jsonify_schema(self, sample_data: t.Dict[str, t.List[SampleRow]]):
         """
         JSONify the sample data
         """
-        samples_json: list[dict] = []
+        samples_json: t.List[dict] = []
         for v in sample_data.values():
             for row in v:
                 row_dict = asdict(row)
@@ -160,7 +160,7 @@ class NGSData:
                 samples_json.append(row_dict)
         return samples_json
 
-    def verify_unique_paths(self, samples: dict[str, list[SampleRow]]):
+    def verify_unique_paths(self, samples: t.Dict[str, t.List[SampleRow]]):
         """
         Verify that all paths in the sample sheet are unique.
         """
@@ -182,12 +182,12 @@ class NGSData:
             logger.error("%d duplicate paths identified see log for information.", dup_paths)
             raise DuplicateFilesException("Duplicate files found.")
 
-    def organize_data(self) -> dict[str, list[SampleRow]]:
+    def organize_data(self) -> t.Dict[str, t.List[SampleRow]]:
         """
         Create the final sample sheet
         """
         pe_reads, se_reads, assemblies = self.get_ngs_data()
-        sample_sheet: dict[str, list[SampleRow]] = dict()
+        sample_sheet: t.Dict[str, t.List[SampleRow]] = dict()
 
         for k, v in pe_reads.items():
             sample_sheet[k] = []
@@ -198,7 +198,7 @@ class NGSData:
         self.update_sample_sheet_se(sample_sheet, assemblies.items(), SampleRow.assembly_key())
         return sample_sheet
     
-    def update_sample_sheet_se(self, sample_sheet: dict[str, list[SampleRow]], items: t.Iterable[tuple[str, list]], field: str):
+    def update_sample_sheet_se(self, sample_sheet: t.Dict[str, t.List[SampleRow]], items: t.Iterable[tuple[str, list]], field: str):
         for k, v in items:
             existing_data = sample_sheet.get(k)
             if existing_data:
@@ -213,13 +213,13 @@ class NGSData:
                 for ngs_data in v:
                     sample_sheet[k].append(SampleRow(sample=k, **{field: ngs_data}))
 
-    def get_ngs_data(self) -> tuple[t.Optional[dict[str, tuple[list[p.Path], list[p.Path]]]], t.Optional[dict[str, list[p.Path]]], t.Optional[dict[str, list[p.Path]]]]:
+    def get_ngs_data(self) -> tuple[t.Optional[t.Dict[str, tuple[t.List[p.Path], t.List[p.Path]]]], t.Optional[t.Dict[str, t.List[p.Path]]], t.Optional[t.Dict[str, t.List[p.Path]]]]:
         """
         consolidate aggregate data into one data structure that can be validated
         """
-        pe_reads: t.Optional[dict[str, tuple[list[p.Path], list[p.Path]]]] = None
-        se_reads: t.Optional[dict[str, list[p.Path]]] = None
-        fastas: t.Optional[dict[str, list[p.Path]]] = None
+        pe_reads: t.Optional[t.Dict[str, tuple[t.List[p.Path], t.List[p.Path]]]] = None
+        se_reads: t.Optional[t.Dict[str, t.List[p.Path]]] = None
+        fastas: t.Optional[t.Dict[str, t.List[p.Path]]] = None
 
         if self.reads:
             pe_reads = self.get_paired_reads(self.reads)
@@ -230,11 +230,11 @@ class NGSData:
             logger.error("No input files found for processing.")
         return (pe_reads, se_reads, fastas)
 
-    def get_paired_reads(self, reads: list[p.Path]) -> dict[str, tuple[list[p.Path], list[p.Path]]]:
+    def get_paired_reads(self, reads: t.List[p.Path]) -> t.Dict[str, tuple[t.List[p.Path], t.List[p.Path]]]:
         """
         Group the reads into bins of paired and unpaired reads
         """
-        r1_reads: dict[str, tuple[list[p.Path], list[p.Path]]] = dict()
+        r1_reads: t.Dict[str, tuple[t.List[p.Path], t.List[p.Path]]] = dict()
         
         for r in reads :
             if not r.match(f"**/*{self.extension_r1}*"):
@@ -245,7 +245,7 @@ class NGSData:
             else:
                 r1_reads[sample_name] = ([r], [])
 
-        r2_reads: list[tuple[str, p.Path]] = [(r.name[:r.name.rfind(self.extension_r2)], r) for r in reads if r.match(f"**/*{self.extension_r2}*")]
+        r2_reads: t.List[tuple[str, p.Path]] = [(r.name[:r.name.rfind(self.extension_r2)], r) for r in reads if r.match(f"**/*{self.extension_r2}*")]
         for r2 in r2_reads:
             if r1 := r1_reads.get(r2[0]):
                 r1[1].append(r2[1])
@@ -256,11 +256,11 @@ class NGSData:
                 raise IndexError
         return r1_reads
     
-    def get_sample_name_and_path(self, data: list[p.Path]) -> dict[str, list[p.Path]]:
+    def get_sample_name_and_path(self, data: t.List[p.Path]) -> t.Dict[str, t.List[p.Path]]:
         """
         take single end reads or assemblies to return a list of tuples containing their contents
         """
-        ngs_data: dict[str, list[p.Path]] = dict()
+        ngs_data: t.Dict[str, t.List[p.Path]] = dict()
         for i in data:
             if self.extension_r1 not in i.name and self.extension_r2 not in i.name:
                 name = i.name[:i.name.index('.')]
@@ -274,7 +274,7 @@ def get_schema_input(url: str) -> json:
     return u.download_json(url, logger)
 
 
-def get_samples(directory: p.Path) -> tuple[list[p.Path], list[p.Path]]:
+def get_samples(directory: p.Path) -> tuple[t.List[p.Path], t.List[p.Path]]:
     """
     Gather all sample information into one place for usage.
 
