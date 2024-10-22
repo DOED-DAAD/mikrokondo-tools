@@ -38,10 +38,59 @@ hatch run +py=3.10 test:mikrokondo-tools
 
 The above command will display command groups with help messages, and each sub command has additional help options.
 
-Console installation has not been tested.
 ```console
 pip install mikrokondo-tools
 ```
+
+## Usage
+
+Running `mikrokondo-tools` generates the following help message with available options for usage:
+
+```
+Usage: mikrokondo-tools [OPTIONS] COMMAND [ARGS]...
+
+Options:
+  --version   Show the version and exit.
+  -h, --help  Show this message and exit.
+
+Commands:
+  download     Download a database for mikrokondo
+  samplesheet  Generate a sample sheet for mikrokondo.
+```
+
+The `download` option generates the following output:
+
+```
+Usage: mikrokondo-tools download [OPTIONS]
+
+  Download a external file for use in mikrokondo. This script only downloads
+  the file and will not untar or unzip them.
+
+Options:
+  -f, --file [gtdb-sketch|gtdb-shigella|dehost|kraken-std|bakta-light|bakta-full]
+                                  Pick an option from the list to download
+                                  [required]
+  -o, --output PATH               An existing directory to download files to.
+                                  [default: your/current/directory]
+  -h, --help                      Show this message and exit.
+```
+
+
+The `samplesheet` option produces the following output:
+
+```
+Usage: mikrokondo-tools samplesheet [OPTIONS] SAMPLE_DIRECTORY
+
+Options:
+  -o, --output-sheet PATH   The file to write your created output sheet to,
+                            this directory must already exist.  [required]
+  -1, --read-1-suffix TEXT  A suffix to identify read 1  [default: _R1_]
+  -2, --read-2-suffix TEXT  A suffix to identify read 2  [default: _R2_]
+  -s, --schema-input PATH   An optional schema_input.json file pre-downloaded
+                            for mikrokondo.
+  -h, --help                Show this message and exit.
+```
+
 
 ## License
 

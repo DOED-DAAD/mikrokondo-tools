@@ -18,6 +18,7 @@ logger = u.get_logger(__name__)
 @dataclass(frozen=True)
 class Constants:
     sketch_url: str = "https://zenodo.org/records/8408361/files/GTDBSketch_20231003.msh"
+    shigella_sketch: str = "https://zenodo.org/records/13969103/files/EnteroRef_GTDBSketch_20231003_V2.msh"
     dehost_idx: str = "https://zenodo.org/records/8408557/files/PhiPacHum_m2.idx"
     kraken2_std: str = "https://genome-idx.s3.amazonaws.com/kraken/k2_standard_20240112.tar.gz"
     bakta_light: str = "https://zenodo.org/records/10522951/files/db-light.tar.gz"
