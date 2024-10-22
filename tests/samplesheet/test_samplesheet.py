@@ -20,14 +20,14 @@ def test_get_samples():
     assert len(ngs_samples[1]) == 2
 
 @pytest.fixture()
-def ngs_data_fail():
+def ngs_data_fail(tmp_path):
     sample_data = ss.get_samples(p.Path("tests/samplesheet/data"))
-    return ss.NGSData(sample_data[0], sample_data[1], "_r1", "_r2")
+    return ss.NGSData(sample_data[0], sample_data[1], "_r1", "_r2", tmp_path / "output.csv")
 
 @pytest.fixture()
-def ngs_data_pass():
+def ngs_data_pass(tmp_path):
     sample_data = ss.get_samples(p.Path("tests/samplesheet/data"))
-    return ss.NGSData(sample_data[0], sample_data[1], "_r1_", "_r2_")
+    return ss.NGSData(sample_data[0], sample_data[1], "_r1_", "_r2_", tmp_path / "output.csv")
 
 def test_get_paired_reads_fails(ngs_data_fail):
     with pytest.raises(IndexError):
@@ -91,7 +91,6 @@ def test_validate_json_pass(ngs_data_pass):
     ngs_data_pass.validate_json(json_data)
 
 
-
 def test_fail_json_validation_fail(ngs_data_pass):
     outputs = {
     "s1": [ss.SampleRow(sample='s1', fastq_1=p.Path('s1_r1_dup.fq.gz'), fastq_2=p.Path('s1_r2_.fq.gz'), long_reads=p.Path('s1.fq.gz'), assembly=p.Path('s1.fa.gz')), 
@@ -103,3 +102,13 @@ def test_fail_json_validation_fail(ngs_data_pass):
     json_data_fail = ngs_data_pass.jsonify_schema(outputs)
     with pytest.raises(js.ValidationError):
         ngs_data_pass.validate_json(json_data_fail)
+
+
+def test_create_sample_sheet(ngs_data_pass, tmp_path):
+    outputs = {
+        "s1": [ss.SampleRow(sample='s1', fastq_1=p.Path('s1_r1_dup.fq.gz'), fastq_2=p.Path('s1_r2_.fq.gz'), long_reads=p.Path('s1.fq.gz'), assembly=p.Path('s1.fa.gz')), 
+            ss.SampleRow(sample='s1', fastq_1=p.Path('s1_r1_.fq.gz'), fastq_2=p.Path('s1_r2_dup.fq.gz'), long_reads=None, assembly=None)], 
+        "s2_r1": [ss.SampleRow(sample='s2_r1', fastq_1=None, fastq_2=None, long_reads=p.Path('s2_r1.fq.gz'), assembly=None)], 
+        "s3": [ss.SampleRow(sample='s3', fastq_1=None, fastq_2=None, long_reads=None, assembly=p.Path('s3.fa.gz'))]}
+    output = tmp_path / "output_sheet.csv"
+    ngs_data_pass.create_sample_sheet(outputs, output)

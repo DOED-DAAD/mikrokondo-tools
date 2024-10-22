@@ -7,7 +7,6 @@ Matthew Wells: 2024-10-21
 import sys
 import logging
 import json
-import typing as t
 
 import requests
 

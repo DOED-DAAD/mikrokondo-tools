@@ -5,11 +5,10 @@ Matthew Wells: 2024-10-21
 """
 import json
 import sys
-from dataclasses import dataclass, asdict
+from dataclasses import dataclass, asdict, fields
 import pathlib as p
 import typing as t
 import errno as e
-import re
 
 import jsonschema as js
 import requests
@@ -63,12 +62,14 @@ class NGSData:
     Organization of ngs data for creation of a sample sheet
     """
 
-    def __init__(self, reads: list[p.Path], fastas: list[p.Path], extension_r1: str, extension_r2: str, json_schema: t.Optional[p.Path] = None):
+    def __init__(self, reads: list[p.Path], fastas: list[p.Path], extension_r1: str, extension_r2: str, output_file: p.Path, json_schema: t.Optional[p.Path] = None):
         self.reads: list[str] = reads
         self.fastas: list[str] = fastas
         self.extension_r1: str = extension_r1
         self.extension_r2: str = extension_r2
-        self.json_schema = self.get_json_schema(json_schema) # todo add in check if this is passed otherwise download it
+        self.json_schema = self.get_json_schema(json_schema)
+        self.output_file = output_file
+
 
     def get_json_schema(self, json_schema: p.Path):
         """
@@ -101,14 +102,31 @@ class NGSData:
                 pattern = rf"(?:{pattern}|^$)"
                 schema[items_key][properties_key][k][pattern_key] = pattern
 
-    def create_sample_sheet(self):
+    def create_sample_sheet(self, sample_data: t.Optional[dict[str, list[SampleRow]]] = None, output_file: t.Optional[p.Path] = None):
         """
         Main runner function to create a sample sheet
         """
-        sample_data = self.organize_data()
+        if sample_data is None:
+            sample_data = self.organize_data()
         self.verify_unique_paths(sample_data)
         jsonified_data = self.jsonify_schema(sample_data)
         self.validate_json(jsonified_data)
+        header = [i.name for i in fields(SampleRow)]
+
+        if output_file is None:
+            output_file = self.output_file
+
+        if output_file.is_file():
+            logger.error("Output file %s already exists.", str(output_file))
+            raise e.EEXIST
+
+        logger.info("Writing sample sheet to %s", str(output_file))
+        with output_file.open("w") as output:
+            output.write(f"{','.join(header)}\n")
+            for data in jsonified_data:
+                output.write(f"{','.join([data[text] for text in header])}\n") # Joining text to maintain order of fields
+
+
 
     
     def validate_json(self, jsonified_data: list[dict]):
