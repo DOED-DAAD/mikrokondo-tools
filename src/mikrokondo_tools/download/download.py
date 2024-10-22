@@ -4,15 +4,15 @@ Download sketches from zenodo
 Matthew Wells: 2024-04-18
 """
 import itertools
-import logging
 import os
 import sys
 from dataclasses import dataclass
 
 import requests
 
-logging.basicConfig(stream=sys.stderr, level=logging.INFO) # TODO this should probably go somewhere else
-logger = logging.getLogger(__name__)
+import mikrokondo_tools.utils as u 
+
+logger = u.get_logger(__name__)
 
 
 @dataclass(frozen=True)

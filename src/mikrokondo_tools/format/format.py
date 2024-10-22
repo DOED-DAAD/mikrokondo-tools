@@ -12,7 +12,9 @@ import os
 import sys
 from dataclasses import dataclass
 
-logger = logging.getLogger(__name__)
+import mikrokondo_tools.utils as u 
+
+logger = u.get_logger(__name__)
 
 
 @dataclass(frozen=True)
