@@ -193,9 +193,10 @@ class NGSData:
             sample_sheet[k] = []
             for idx in range(len(v[0])):
                 sample_sheet[k].append(SampleRow(sample=k, fastq_1=v[0][idx], fastq_2=v[1][idx]))
-
-        self.update_sample_sheet_se(sample_sheet, se_reads.items(), SampleRow.longreads_key())
-        self.update_sample_sheet_se(sample_sheet, assemblies.items(), SampleRow.assembly_key())
+        if se_reads:
+            self.update_sample_sheet_se(sample_sheet, se_reads.items(), SampleRow.longreads_key())
+        if assemblies:
+            self.update_sample_sheet_se(sample_sheet, assemblies.items(), SampleRow.assembly_key())
         return sample_sheet
     
     def update_sample_sheet_se(self, sample_sheet: t.Dict[str, t.List[SampleRow]], items: t.Iterable[t.Tuple[str, list]], field: str):
