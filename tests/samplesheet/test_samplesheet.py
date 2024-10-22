@@ -46,7 +46,6 @@ def test_get_se(ngs_data_pass):
 
 @pytest.mark.xfail
 def test_organize_data(ngs_data_pass):
-    #pytest.skip("Should work but fails in GHA as order of files in different file systems affects the test.")
     ss_out = ngs_data_pass.organize_data()
     outputs = {
     "s1": [ss.SampleRow(sample='s1', fastq_1=p.Path('s1_r1_dup.fq.gz'), fastq_2=p.Path('s1_r2_.fq.gz'), long_reads=p.Path('s1.fq.gz'), assembly=p.Path('s1.fa.gz')), 
