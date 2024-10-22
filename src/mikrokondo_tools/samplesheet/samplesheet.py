@@ -5,11 +5,14 @@ Matthew Wells: 2024-10-21
 """
 import json
 import sys
-from dataclasses import dataclass
+from dataclasses import dataclass, asdict
 import pathlib as p
 import typing as t
 import errno as e
+import re
 
+import jsonschema as js
+import requests
 
 import mikrokondo_tools.utils as u 
 
@@ -22,6 +25,12 @@ __FASTQ_EXTENSIONS__ = frozenset([".fastq", ".fq"])
 __COMPRESSION_TYPES__ = frozenset([".gz"])
 
 
+class DuplicateFilesException(Exception):
+    pass
+
+class MissingSchemaException(Exception):
+    pass
+
 @dataclass
 class SampleRow:
     sample: str
@@ -30,18 +39,132 @@ class SampleRow:
     long_reads: t.Optional[p.Path] = None
     assembly: t.Optional[p.Path] = None
 
+    def __getitem__(self, name: str) -> str | p.Path | None :
+        return getattr(self, name)
+    
+    def __setitem__(self, key: str, value: str) -> None:
+        setattr(self, key, value)
+
+    def all_paths(self):
+        return [self.fastq_1, self.fastq_2, self.long_reads, self.assembly]
+
+    @classmethod
+    def longreads_key(cls) -> str:
+        #! Coupling with field name here
+        return "long_reads"
+    
+    @classmethod
+    def assembly_key(cls) -> str:
+        #! Coupling with field name here
+        return "assembly"
+
 class NGSData:
     """
     Organization of ngs data for creation of a sample sheet
     """
 
-    def __init__(self, reads: list[p.Path], fastas: list[p.Path], extension_r1: str, extension_r2: str):
+    def __init__(self, reads: list[p.Path], fastas: list[p.Path], extension_r1: str, extension_r2: str, json_schema: t.Optional[p.Path] = None):
         self.reads: list[str] = reads
         self.fastas: list[str] = fastas
         self.extension_r1: str = extension_r1
         self.extension_r2: str = extension_r2
+        self.json_schema = self.get_json_schema(json_schema) # todo add in check if this is passed otherwise download it
+
+    def get_json_schema(self, json_schema: p.Path):
+        """
+        Get the json schema to use
+        """
+        schema: dict = dict()
+        if json_schema is not None:
+            logger.info("Using schema path passed from command line %s", json_schema)
+            with open(json_schema, 'r') as input_js:
+                schema = json.load(input_js)
+        else:
+            logger.info("No json schema passed as an argument, downloading from: %s", __SCHEMA_INPUT_JSON__)
+            try:
+                schema = u.download_json(__SCHEMA_INPUT_JSON__, logger)
+            except requests.HTTPError:
+                logger.error("Could not download input schema nor was one passed to the program.")
+                raise MissingSchemaException
+        self._fix_pattern_regex(schema)
+        return schema
+    
+    def _fix_pattern_regex(self, schema):
+        """
+        Incorporate empty string in pattern to allow for empty values
+        """
+        items_key: str = "items"
+        properties_key: str = "properties"
+        pattern_key: str = "pattern"
+        for k, v in schema[items_key][properties_key].items():
+            if pattern := v.get(pattern_key):
+                pattern = rf"(?:{pattern}|^$)"
+                schema[items_key][properties_key][k][pattern_key] = pattern
 
     def create_sample_sheet(self):
+        """
+        Main runner function to create a sample sheet
+        """
+        sample_data = self.organize_data()
+        self.verify_unique_paths(sample_data)
+        jsonified_data = self.jsonify_schema(sample_data)
+        self.validate_json(jsonified_data)
+
+    
+    def validate_json(self, jsonified_data: list[dict]):
+        """
+        Validate the json data
+        """
+        # Select correct Validator
+        validator_class = js.validators.validator_for(self.json_schema)
+        validator = validator_class(self.json_schema)
+        errors = validator.iter_errors(jsonified_data)
+        error_p = False
+        for err in errors:
+            error_p = True
+            logger.error("Sample sheet validation error: %s", err.message)
+        if error_p:
+            raise js.ValidationError("Validation errors encountered check logs")
+    
+    def jsonify_schema(self, sample_data: dict[str, list[SampleRow]]):
+        """
+        JSONify the sample data
+        """
+        samples_json: list[dict] = []
+        for v in sample_data.values():
+            for row in v:
+                row_dict = asdict(row)
+                for k, v in row_dict.items():
+                    if v is None:
+                        row_dict[k] = ""
+                    elif isinstance(v, p.Path):
+                        row_dict[k] = str(v)
+                samples_json.append(row_dict)
+        return samples_json
+
+    def verify_unique_paths(self, samples: dict[str, list[SampleRow]]):
+        """
+        Verify that all paths in the sample sheet are unique.
+        """
+        error = False
+        paths: set[p.Path] = set()
+        dup_paths: int = 0
+        for k, v in samples.items():
+            for rows in v:
+                for path in rows.all_paths():
+                    if path is None:
+                        continue
+                    if path in paths:
+                        logger.error("Duplicate path listed in sample sheet for sample %s: %s this will cause an error.", k, path)
+                        dup_paths += 1
+                        error = True
+                    else:
+                        paths.add(path)
+        if error:
+            logger.error("%d duplicate paths identified see log for information.", dup_paths)
+            raise DuplicateFilesException("Duplicate files found.")
+
+    def organize_data(self) -> dict[str, list[SampleRow]]:
         """
         Create the final sample sheet
         """
@@ -53,22 +176,24 @@ class NGSData:
             for idx in range(len(v[0])):
                 sample_sheet[k].append(SampleRow(sample=k, fastq_1=v[0][idx], fastq_2=v[1][idx]))
 
-        
-        # TODO tommorrow seperate this into a different function and add the option to incorporate assemblies
-        for k, v in se_reads.items():
+        self.update_sample_sheet_se(sample_sheet, se_reads.items(), SampleRow.longreads_key())
+        self.update_sample_sheet_se(sample_sheet, assemblies.items(), SampleRow.assembly_key())
+        return sample_sheet
+    
+    def update_sample_sheet_se(self, sample_sheet: dict[str, list[SampleRow]], items: t.Iterable[tuple[str, list]], field: str):
+        for k, v in items:
             existing_data = sample_sheet.get(k)
             if existing_data:
                 existing_data_len = len(existing_data)
                 for idx, value in enumerate(v):
-                    if existing_data_len < idx:
-                        existing_data[idx].long_reads = value
+                    if idx < existing_data_len:
+                        existing_data[idx][field] = value
                     else:
-                        existing_data.append(SampleRow(sample=k, long_reads=value))
+                        existing_data.append(SampleRow(sample=k, **{field: value}))
             else:
                 sample_sheet[k] = []
                 for ngs_data in v:
-                    sample_sheet[k].append(SampleRow(sample=k, long_reads=ngs_data))
-
+                    sample_sheet[k].append(SampleRow(sample=k, **{field: ngs_data}))
 
     def get_ngs_data(self) -> tuple[t.Optional[dict[str, tuple[list[p.Path], list[p.Path]]]], t.Optional[dict[str, list[p.Path]]], t.Optional[dict[str, list[p.Path]]]]:
         """

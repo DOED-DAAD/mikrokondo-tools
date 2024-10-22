@@ -29,4 +29,4 @@ def download_json(url: str, logger: logging.Logger) -> json:
             logger.error("Could not access: %s", url)
             sys.exit(requests.HTTPError)
         else:
-            return json.loads(resp.text)
+            return json.loads(rf"{resp.text}")
