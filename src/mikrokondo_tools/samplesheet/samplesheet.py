@@ -38,7 +38,7 @@ class SampleRow:
     long_reads: t.Optional[p.Path] = None
     assembly: t.Optional[p.Path] = None
 
-    def __getitem__(self, name: str) -> str | p.Path | None :
+    def __getitem__(self, name: str) -> t.Union[str, p.Path, None] :
         return getattr(self, name)
     
     def __setitem__(self, key: str, value: str) -> None:
