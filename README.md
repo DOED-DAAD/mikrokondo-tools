@@ -16,7 +16,15 @@
 
 ## Installation
 
-### Current Run Method
+### Installation from PIP
+
+The easiest way to install the repository is from pip by running the following command.
+
+```
+pip install mikrokondo-tools
+```
+
+### Installation Instructions for Developers
 
 No package has been created yet, however the software can be run and developed using `hatch`. To run the tests in all supported python versions using hatch simply enter:
 ```
@@ -38,8 +46,10 @@ hatch run +py=3.10 test:mikrokondo-tools
 
 The above command will display command groups with help messages, and each sub command has additional help options.
 
+This option can be used to create a developer install from the source repository.
+
 ```console
-pip install mikrokondo-tools
+pip install -e mikrokondo-tools
 ```
 
 ## Usage
