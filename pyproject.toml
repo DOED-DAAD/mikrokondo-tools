@@ -11,7 +11,7 @@ requires-python = ">=3.8"
 license = "MIT"
 keywords = []
 authors = [
-  { name = "Matthew Wells", email = "mattwells9@shaw.ca" },
+  { name = "Matthew Wells", email = "mattheww9514@gmail.com" },
 ]
 classifiers = [
   "Development Status :: 4 - Beta",
@@ -36,7 +36,7 @@ Issues = "https://github.com/unknown/mikrokondo-tools/issues"
 Source = "https://github.com/unknown/mikrokondo-tools"
 
 [project.scripts]
-mikrokondo-tools = "mikrokondo_tools.cli:mikrokondo_tools"
+mikrokondo-tools = "mikrokondo_tools.cli:safe_entry_point"
 
 [tool.hatch.version]
 path = "src/mikrokondo_tools/__about__.py"

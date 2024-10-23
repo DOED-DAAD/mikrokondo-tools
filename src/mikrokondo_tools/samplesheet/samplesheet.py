@@ -30,6 +30,9 @@ class DuplicateFilesException(Exception):
 class MissingSchemaException(Exception):
     pass
 
+class NoFilesFoundException(Exception):
+    pass
+
 @dataclass
 class SampleRow:
     sample: str
@@ -189,10 +192,11 @@ class NGSData:
         pe_reads, se_reads, assemblies = self.get_ngs_data()
         sample_sheet: t.Dict[str, t.List[SampleRow]] = dict()
 
-        for k, v in pe_reads.items():
-            sample_sheet[k] = []
-            for idx in range(len(v[0])):
-                sample_sheet[k].append(SampleRow(sample=k, fastq_1=v[0][idx], fastq_2=v[1][idx]))
+        if pe_reads:
+            for k, v in pe_reads.items():
+                sample_sheet[k] = []
+                for idx in range(len(v[0])):
+                    sample_sheet[k].append(SampleRow(sample=k, fastq_1=v[0][idx], fastq_2=v[1][idx]))
         if se_reads:
             self.update_sample_sheet_se(sample_sheet, se_reads.items(), SampleRow.longreads_key())
         if assemblies:
@@ -294,7 +298,7 @@ def get_samples(directory: p.Path) -> t.Tuple[t.List[p.Path], t.List[p.Path]]:
             try:
                 sfx = file.suffixes[-2] # get second last file extension
             except IndexError:
-                logger.error("File: %s is inappropriately no other extension is present besides %s", file, sfx)
+                logger.error("File: %s is inappropriately named no other extension is present besides %s", file, sfx)
                 sys.exit(-1)
         if sfx in __FASTQ_EXTENSIONS__:
             reads.append(file.absolute())
@@ -303,5 +307,8 @@ def get_samples(directory: p.Path) -> t.Tuple[t.List[p.Path], t.List[p.Path]]:
         else:
             logger.warning("Miscellaneous file present in sample directory: %s", file)
     
+    if not reads and not fastas:
+        logger.error("No files found in: %s", directory)
+        raise NoFilesFoundException
     return reads, fastas
 

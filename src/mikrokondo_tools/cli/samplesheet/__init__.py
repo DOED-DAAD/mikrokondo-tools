@@ -21,4 +21,4 @@ def samplesheet(output_sheet, read_1, read_2, input_directory, schema_input):
 
     data = ss.get_samples(p.Path(input_directory))
     ngs_data = ss.NGSData(data[0], data[1], read_1, read_2, output_sheet, schema_input)
-    return ngs_data.create_sample_sheet()
+    ngs_data.create_sample_sheet()
