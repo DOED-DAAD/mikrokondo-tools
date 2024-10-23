@@ -9,7 +9,7 @@ if __name__ == "__main__":
     #from mikrokondo_tools.cli import mikrokondo_tools
     from mikrokondo_tools.cli import main
     logger = u.get_logger(__name__)
-    
+
     try:
         main()
     except Exception as e:
@@ -22,4 +22,4 @@ if __name__ == "__main__":
     else:
         logger.info("Program finished.")
 
-    sys.exit(-1)
+    sys.exit(0)
