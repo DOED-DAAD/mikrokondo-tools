@@ -85,6 +85,7 @@ Options:
   -h, --help                      Show this message and exit.
 ```
 
+The `samplesheet` command can be used to create and validate sample sheet from a directory of NGS data. The `schema_input.json` file is downloaded directly from the main mikrokondo repository each time so this utility will update with the pipeline. You can still pass a pre-existing `schema_input.json` file to the utility if you do not have internet access or you are using an older version of the pipeline that is no longer supported.
 
 The `samplesheet` option produces the following output:
 
