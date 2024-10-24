@@ -27,7 +27,8 @@ classifiers = [
 dependencies = [
   "click",
   "requests",
-  "jsonschema"
+  "jsonschema",
+  "textual"
 ]
 
 [project.urls]
