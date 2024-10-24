@@ -24,6 +24,13 @@ The easiest way to install the repository is from pip by running the following c
 pip install mikrokondo-tools
 ```
 
+### Installation from conda
+
+```
+conda install mikrokondo-tools -c bioconda
+```
+
+
 ### Installation Instructions for Developers
 
 No package has been created yet, however the software can be run and developed using `hatch`. To run the tests in all supported python versions using hatch simply enter:
