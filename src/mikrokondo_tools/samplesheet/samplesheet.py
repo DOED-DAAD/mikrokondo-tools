@@ -10,6 +10,7 @@ import pathlib as p
 import typing as t
 import errno as e
 
+import pandas as pd
 import jsonschema as js
 import requests
 
@@ -128,8 +129,6 @@ class NGSData:
             output.write(f"{','.join(header)}\n")
             for data in jsonified_data:
                 output.write(f"{','.join([data[text] for text in header])}\n") # Joining text to maintain order of fields
-
-
 
     
     def validate_json(self, jsonified_data: t.List[dict]):
@@ -312,3 +311,26 @@ def get_samples(directory: p.Path) -> t.Tuple[t.List[p.Path], t.List[p.Path]]:
         raise NoFilesFoundException
     return reads, fastas
 
+def validate_samplesheet(sample_sheet: p.Path, json_schema: t.Optional[p.Path] = None) -> t.Dict[str, t.List[SampleRow]]:
+    """
+    Parse and validate an existing sample sheet.
+    """
+    logger.info(f"Reading samplesheet: {str(sample_sheet)}")
+    df = pd.read_csv(sample_sheet, index_col=0)
+    #! Not using the df.to_dict as it requires unique index values which is not guaranteed in sample sheets
+    # dict_values = df.to_dict(orient='index')
+    input_data: t.Dict[str, t.List[SampleRow]] = dict()
+    for row in df.itertuples():
+        sample_name = row.Index
+        if input_data.get(sample_name) is None:
+            input_data[sample_name] = []
+        value = {i.name: getattr(row, i.name) for i in fields(SampleRow) if hasattr(row, i.name) and not pd.isna(getattr(row, i.name))}
+        input_data[sample_name].append(SampleRow(sample=sample_name, **value))
+    ngs_data = NGSData(None, None, None, None, json_schema)
+    logger.info("Verifying unique paths in sample sheet are unique.")
+    ngs_data.verify_unique_paths(input_data)
+    jsonified_schema = ngs_data.jsonify_schema(input_data)
+    logger.info("Validating input with provided json schema.")
+    ngs_data.validate_json(jsonified_schema)
+    logger.info("No errors identified.")
+    

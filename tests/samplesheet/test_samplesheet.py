@@ -91,6 +91,7 @@ def test_validate_json_pass(ngs_data_pass):
     ngs_data_pass.validate_json(json_data)
 
 
+@pytest.mark.skip(reason="Current updates to the schema in mikrokondo do not allow for testing of this function.")
 def test_fail_json_validation_fail(ngs_data_pass):
     outputs = {
     "s1": [ss.SampleRow(sample='s1', fastq_1=p.Path('s1_r1_dup.fq.gz'), fastq_2=p.Path('s1_r2_.fq.gz'), long_reads=p.Path('s1.fq.gz'), assembly=p.Path('s1.fa.gz')), 
@@ -112,3 +113,25 @@ def test_create_sample_sheet(ngs_data_pass, tmp_path):
         "s3": [ss.SampleRow(sample='s3', fastq_1=None, fastq_2=None, long_reads=None, assembly=p.Path('s3.fa.gz'))]}
     output = tmp_path / "output_sheet.csv"
     ngs_data_pass.create_sample_sheet(outputs, output)
+
+
+@pytest.mark.parametrize("samplesheet", [
+    ("tests/samplesheet/data/samplesheet-campy-staph.csv"),
+    ("tests/samplesheet/data/samplesheet-make-names-unique.csv"),
+    ("tests/samplesheet/data/samplesheet-merge-test.csv"),
+    ("tests/samplesheet/data/samplesheet-set-ext-id.csv"),
+    ("tests/samplesheet/data/samplesheet-small-assembly-inx.csv"),
+    ("tests/samplesheet/data/samplesheet-small-assembly.csv"),
+    ("tests/samplesheet/data/samplesheet-small-metagenomic.csv"),
+    ("tests/samplesheet/data/samplesheet-test-from-assemblies-listeria.csv"),
+    ("tests/samplesheet/data/samplesheet-test-from-assemblies-salmonella.csv"),
+    ("tests/samplesheet/data/samplesheet-test-from-assemblies-vibrio-stupid-names.csv"),
+    ("tests/samplesheet/data/samplesheet-test-from-assemblies-vibrio.csv"),
+    ("tests/samplesheet/data/samplesheet-test-from-assemblies.csv")
+    ])
+def test_validate_samplesheet(samplesheet):
+    ss.validate_samplesheet(samplesheet)
+
+def test_validate_samplesheet_faile():
+    with pytest.raises(ss.DuplicateFilesException):
+        ss.validate_samplesheet("tests/samplesheet/data/samplesheet-fail-duplicate-paths.csv")
