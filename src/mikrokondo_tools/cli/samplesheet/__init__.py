@@ -22,3 +22,9 @@ def samplesheet(output_sheet, read_1, read_2, input_directory, schema_input):
     data = ss.get_samples(p.Path(input_directory))
     ngs_data = ss.NGSData(data[0], data[1], read_1, read_2, output_sheet, schema_input)
     ngs_data.create_sample_sheet()
+
+@click.command(short_help="Lint an existing sample sheet for errors.", no_args_is_help=True, context_settings={'show_default': True})
+@click.option("-s", "--schema-input", "schema_input", type=click.Path(), default=None, help="An optional schema_input.json file pre-downloaded for mikrokondo.")
+@click.option("-i", "--input-sheet", "input_sheet", required=True, type=click.Path(), help="Input sample sheet to use for linting.")
+def lint(schema_input, input_sheet):
+    ss.validate_samplesheet(p.Path(input_sheet), schema_input)

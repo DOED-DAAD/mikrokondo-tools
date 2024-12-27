@@ -16,7 +16,22 @@
 
 ## Installation
 
-### Current Run Method
+### Installation from PIP
+
+The easiest way to install the repository is from pip by running the following command.
+
+```
+pip install mikrokondo-tools
+```
+
+### Installation from conda
+
+```
+conda install mikrokondo-tools -c bioconda
+```
+
+
+### Installation Instructions for Developers
 
 No package has been created yet, however the software can be run and developed using `hatch`. To run the tests in all supported python versions using hatch simply enter:
 ```
@@ -38,8 +53,10 @@ hatch run +py=3.10 test:mikrokondo-tools
 
 The above command will display command groups with help messages, and each sub command has additional help options.
 
+This option can be used to create a developer install from the source repository.
+
 ```console
-pip install mikrokondo-tools
+pip install -e mikrokondo-tools
 ```
 
 ## Usage
@@ -75,6 +92,7 @@ Options:
   -h, --help                      Show this message and exit.
 ```
 
+The `samplesheet` command can be used to create and validate sample sheet from a directory of NGS data. The `schema_input.json` file is downloaded directly from the main mikrokondo repository each time so this utility will update with the pipeline. You can still pass a pre-existing `schema_input.json` file to the utility if you do not have internet access or you are using an older version of the pipeline that is no longer supported.
 
 The `samplesheet` option produces the following output:
 
