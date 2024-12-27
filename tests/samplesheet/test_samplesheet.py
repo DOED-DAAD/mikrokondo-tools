@@ -91,15 +91,16 @@ def test_validate_json_pass(ngs_data_pass):
     ngs_data_pass.validate_json(json_data)
 
 
-@pytest.mark.skip(reason="Current updates to the schema in mikrokondo do not allow for testing of this function.")
+
 def test_fail_json_validation_fail(ngs_data_pass):
     outputs = {
     "s1": [ss.SampleRow(sample='s1', fastq_1=p.Path('s1_r1_dup.fq.gz'), fastq_2=p.Path('s1_r2_.fq.gz'), long_reads=p.Path('s1.fq.gz'), assembly=p.Path('s1.fa.gz')), 
-        ss.SampleRow(sample='s1', fastq_1=p.Path('s1_r1_.fq.gz'), fastq_2=p.Path('s1_r2_dup.fq.gz'), long_reads=None, assembly=None)], 
-    "s2_r1": [ss.SampleRow(sample='s2_r1', fastq_1=None, fastq_2=None, long_reads=p.Path('s2_r1.fq.gz'), assembly=None)], 
+        ss.SampleRow(sample='s1', fastq_1=p.Path('s1_r1_.fq.gz'), fastq_2=p.Path('s1_r2_dup.fq'), long_reads=None, assembly=None)], 
+    "s2_r1": [ss.SampleRow(sample='s2_r1', fastq_1=None, fastq_2=None, long_reads=p.Path('s2 r1.fq.gz'), assembly=None)], 
+    "s2_r2": [ss.SampleRow(sample='s2_r1', fastq_1=None, fastq_2=None, long_reads=p.Path('s2_r1.fq.gz'), assembly=None)], 
     "s3": [ss.SampleRow(sample='s3', fastq_1=None, fastq_2=None, long_reads=None, assembly=p.Path('s3.fa.gz'))],
     "s4": [ss.SampleRow(sample='s4', fastq_1=None, fastq_2=None, long_reads=None, assembly=p.Path('s4.fa'))],
-    "s5": [ss.SampleRow(sample='s5', fastq_1=None, fastq_2=None, long_reads=None, assembly=p.Path('st.fa'))]}
+    "s5": [ss.SampleRow(sample='s5', fastq_1=None, fastq_2=None, long_reads=None, assembly=p.Path('st'))]}
     json_data_fail = ngs_data_pass.jsonify_schema(outputs)
     with pytest.raises(js.ValidationError):
         ngs_data_pass.validate_json(json_data_fail)
